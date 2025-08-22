@@ -1,6 +1,7 @@
 "use client";
 
 import { addCategory } from "@/redux/slices/boardSlice";
+import { AppDispatch } from "@/redux/store";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 
@@ -9,7 +10,7 @@ export default function AddColumnModal() {
   const [title, setTitle] = useState("");
   const [err, setErr] = useState("");
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
   const handleOpen = () => {
     setOpen((prev) => !prev);
@@ -21,7 +22,7 @@ export default function AddColumnModal() {
 
     if (!name) setErr("Name Required!");
     else {
-      dispatch(addCategory({ name: name }) as any);
+      dispatch(addCategory({ name: name }));
       handleOpen();
     }
   };

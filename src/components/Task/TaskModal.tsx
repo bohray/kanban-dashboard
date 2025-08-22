@@ -2,7 +2,7 @@
 
 import { useDispatch, useSelector } from "react-redux";
 import { addTask, updateTask, addLabel } from "../../redux/slices/boardSlice";
-import { RootState } from "../../redux/store";
+import { AppDispatch, RootState } from "../../redux/store";
 import { ColumnId, Task } from "../../lib/types";
 import { useState } from "react";
 import LabelPicker from "./LabelPicker";
@@ -19,7 +19,7 @@ const statusOptions: ColumnId[] = [
 ];
 
 export default function TaskModal(props: Props) {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const tasks = useSelector((s: RootState) => s.board.tasks);
 
   const initial: Partial<Task> =
@@ -35,7 +35,12 @@ export default function TaskModal(props: Props) {
   const [newLabel, setNewLabel] = useState("");
   const [err, setErr] = useState<string | null>(null);
 
-  const updateForm = (field: keyof typeof form, value: any) => {
+  type FormState = typeof form;
+
+  const updateForm = <K extends keyof FormState>(
+    field: K,
+    value: FormState[K]
+  ) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -53,13 +58,13 @@ export default function TaskModal(props: Props) {
     };
 
     if (props.mode === "create") {
-      dispatch(addTask(taskData) as any);
+      dispatch(addTask(taskData));
     } else {
       dispatch(
         updateTask({
-          id: (props as any).id,
+          id: props.id,
           changes: taskData,
-        }) as any
+        })
       );
     }
 
@@ -69,7 +74,7 @@ export default function TaskModal(props: Props) {
   const handleAddLabel = () => {
     const name = newLabel.trim();
     if (!name) return;
-    dispatch(addLabel({ name }) as any);
+    dispatch(addLabel({ name }));
     updateForm("labels", Array.from(new Set([...form.labels, name])));
     setNewLabel("");
   };

@@ -1,25 +1,26 @@
 "use client";
 
-import { Task, ColumnId } from "../../lib/types";
+import { Task } from "../../lib/types";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
 import { deleteTask } from "../../redux/slices/boardSlice";
 import TaskModal from "./TaskModal";
 import { labelsData } from "@/constants/static-label-data";
 import DeleteModal from "../Common/DeleteModal";
+import { AppDispatch } from "@/redux/store";
 
 export default function TaskCard({ task }: { task: Task }) {
   const [displayMenu, setDisplayMenu] = useState(false);
   const [open, setOpen] = useState(false);
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
   const handleDisplay = () => {
     setDisplayMenu((prev) => !prev);
   };
 
   const handleDelete = () => {
-    dispatch(deleteTask({ id: task.id }) as any);
+    dispatch(deleteTask({ id: task.id }));
   };
 
   return (

@@ -4,7 +4,6 @@ import { useSelector } from "react-redux";
 import { RootState } from "../../redux/store";
 import { useRouter } from "next/navigation";
 import { useEffect } from "react";
-Header;
 import KanbanBoard from "../../components/Dashboard/KanbanBoard";
 import Header from "@/components/Dashboard/Header";
 

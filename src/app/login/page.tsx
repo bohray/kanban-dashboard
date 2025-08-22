@@ -2,13 +2,15 @@
 
 import { useDispatch, useSelector } from "react-redux";
 import { signUpOrLogin } from "../../redux/slices/authSlice";
-import { RootState } from "../../redux/store";
+import { AppDispatch, RootState } from "../../redux/store";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
 export default function LoginPage() {
   const auth = useSelector((s: RootState) => s.auth);
-  const dispatch = useDispatch();
+
+  const dispatch = useDispatch<AppDispatch>();
+
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,7 +35,7 @@ export default function LoginPage() {
       setErr(v);
       return;
     }
-    dispatch(signUpOrLogin({ email }) as any);
+    dispatch(signUpOrLogin({ email }));
     router.replace("/board");
   };
 

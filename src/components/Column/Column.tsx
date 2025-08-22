@@ -1,7 +1,7 @@
 "use client";
 
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../redux/store";
+import { AppDispatch, RootState } from "../../redux/store";
 import { Column as ColumnT } from "../../lib/types";
 import { deleteCategory } from "../../redux/slices/boardSlice";
 import TaskCard from "../Task/TaskCard";
@@ -19,10 +19,10 @@ export default function Column({
   const tasks = useSelector((s: RootState) => s.board.tasks);
   const [displayMenu, setDisplayMenu] = useState(false);
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
   const handleDelete = () => {
-    dispatch(deleteCategory({ id: column.id }) as any);
+    dispatch(deleteCategory({ id: column.id }));
   };
 
   const handleDisplay = () => {

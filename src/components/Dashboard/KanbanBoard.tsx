@@ -27,7 +27,7 @@ export default function KanbanBoard() {
       {open && (
         <TaskModal
           mode="create"
-          initial={{ status: open.columnId as any }}
+          initial={{ status: open.columnId }}
           onClose={() => setOpen(null)}
         />
       )}

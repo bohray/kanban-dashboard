@@ -3,10 +3,10 @@
 import { useDispatch, useSelector } from "react-redux";
 import { setFilters } from "../../redux/slices/boardSlice";
 import { logout } from "../../redux/slices/authSlice";
-import { RootState } from "../../redux/store";
+import { AppDispatch, RootState } from "../../redux/store";
 
 export default function Header() {
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { labels, filters } = useSelector((s: RootState) => s.board);
   const { email } = useSelector((s: RootState) => s.auth);
 
@@ -27,7 +27,7 @@ export default function Header() {
           </div>
           <button
             className="cursor-pointer rounded-xl px-3 py-2 bg-red-700 hover:bg-red-600 text-white"
-            onClick={() => dispatch(logout() as any)}
+            onClick={() => dispatch(logout())}
           >
             Logout
           </button>
@@ -40,17 +40,13 @@ export default function Header() {
             className="w-64 rounded-xl border border-gray-300 px-3 py-2"
             placeholder="Search by issue name..."
             value={filters.query}
-            onChange={(e) =>
-              dispatch(setFilters({ query: e.target.value }) as any)
-            }
+            onChange={(e) => dispatch(setFilters({ query: e.target.value }))}
           />
         </div>
         <select
           className="rounded-xl border border-gray-300 px-3 py-2"
           value={filters.label ?? "All"}
-          onChange={(e) =>
-            dispatch(setFilters({ label: e.target.value }) as any)
-          }
+          onChange={(e) => dispatch(setFilters({ label: e.target.value }))}
         >
           <option>All</option>
           {labels.map((l) => (
@@ -61,7 +57,9 @@ export default function Header() {
           className="rounded-xl border border-gray-300 px-3 py-2"
           value={filters.sort}
           onChange={(e) =>
-            dispatch(setFilters({ sort: e.target.value as any }) as any)
+            dispatch(
+              setFilters({ sort: e.target.value as "newest" | "oldest" })
+            )
           }
         >
           <option value="newest">Newest</option>

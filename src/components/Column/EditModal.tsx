@@ -4,6 +4,7 @@ import { renameCategory } from "@/redux/slices/boardSlice";
 import { Column as ColumnT } from "../../lib/types";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
+import { AppDispatch } from "@/redux/store";
 
 type Props = {
   column: ColumnT;
@@ -15,7 +16,7 @@ export default function EditModal({ column, onClose }: Props) {
   const [title, setTitle] = useState<string>("");
   const [err, setErr] = useState<string>("");
 
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
 
   const handleClick = () => {
     setOpen((prev) => !prev);
@@ -34,7 +35,7 @@ export default function EditModal({ column, onClose }: Props) {
     }
 
     if (name) {
-      dispatch(renameCategory({ id: column.id, name: name }) as any);
+      dispatch(renameCategory({ id: column.id, name: name }));
       handleClose();
     }
   };
