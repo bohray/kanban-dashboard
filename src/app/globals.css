@@ -9,9 +9,12 @@ body {
 :root {
   --ring: 0 0% 10%;
 }
-* {
-  @apply outline-none;
+
+/* Hide scrollbar visually while keeping scroll/drag functionality */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
-*:focus-visible {
-  @apply ring-2 ring-gray-900/10 rounded-md;
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
 }

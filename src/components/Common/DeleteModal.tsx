@@ -1,73 +1,50 @@
 "use client";
 
-import { useState } from "react";
+import Modal from "./Modal";
 
 type Props = {
   title: string;
-  handleDelete: () => void;
-  isColumn?: boolean;
+  onConfirm: () => void;
   onClose: () => void;
+  isColumn?: boolean;
 };
 
 export default function DeleteModal({
   title,
-  handleDelete,
-  isColumn = true,
+  onConfirm,
   onClose,
+  isColumn = true,
 }: Props) {
-  const [open, setOpen] = useState<boolean>(false);
-
-  const handleClick = () => {
-    setOpen((prev) => !prev);
-  };
-
-  const handleClose = () => {
-    handleClick();
-    onClose();
-  };
-
-  const onDelete = () => {
-    handleDelete();
-    handleClose();
-  };
-
   return (
-    <>
-      <button
-        className="px-3 py-1 hover:bg-gray-300 w-full cursor-pointer"
-        onClick={handleClick}
-      >
-        Delete
-      </button>
-      {open && (
-        <div className="fixed inset-0 bg-black/20 grid place-items-center">
-          <div className="w-full max-w-md bg-white rounded-2xl border border-gray-300 shadow p-4">
-            <h3 className="text-lg font-semibold">Delete Column</h3>
-            <div className="py-2">
-              <p>
-                Do you want to delete <b>{title}</b>
-                {isColumn ? " along with its tasks?" : "?"}
-              </p>
+    <Modal onClose={onClose}>
+      <h3 className="text-lg font-semibold">
+        Delete {isColumn ? "Column" : "Task"}
+      </h3>
+      <div className="py-2">
+        <p>
+          Do you want to delete <b>{title}</b>?
+          {isColumn ? " Its tasks will be moved to Unassigned." : ""}
+        </p>
 
-              <div className="flex justify-end gap-2 mt-3">
-                <button
-                  type="button"
-                  className="rounded-xl border border-gray-300 px-3 py-2 bg-gray-50 hover:bg-gray-300 cursor-pointer"
-                  onClick={handleClose}
-                >
-                  Cancel
-                </button>
-                <button
-                  className="rounded-xl bg-red-700 text-white px-4 py-2 hover:bg-red-700/50 cursor-pointer"
-                  onClick={onDelete}
-                >
-                  Delete
-                </button>
-              </div>
-            </div>
-          </div>
+        <div className="mt-3 flex justify-end gap-2">
+          <button
+            type="button"
+            className="cursor-pointer rounded-xl border border-gray-300 bg-gray-50 px-3 py-2 hover:bg-gray-300"
+            onClick={onClose}
+          >
+            Cancel
+          </button>
+          <button
+            className="cursor-pointer rounded-xl bg-red-700 px-4 py-2 text-white hover:bg-red-700/50"
+            onClick={() => {
+              onConfirm();
+              onClose();
+            }}
+          >
+            Delete
+          </button>
         </div>
-      )}
-    </>
+      </div>
+    </Modal>
   );
 }

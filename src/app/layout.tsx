@@ -1,7 +1,12 @@
-"use client";
+import type { Metadata } from "next";
 import "./globals.css";
-import { Provider } from "react-redux";
-import { store } from "@/redux/store";
+import Providers from "./providers";
+
+export const metadata: Metadata = {
+  title: "FlowBoard — Kanban Workflow Board",
+  description:
+    "A drag-and-drop kanban board for tracking work across customizable columns.",
+};
 
 export default function RootLayout({
   children,
@@ -11,7 +16,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body>
-        <Provider store={store}>{children}</Provider>
+        <Providers>{children}</Providers>
       </body>
     </html>
   );

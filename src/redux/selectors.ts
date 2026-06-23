@@ -1,5 +1,6 @@
 import { createSelector } from "@reduxjs/toolkit";
 import { RootState } from "./store";
+import { UNASSIGNED_ID } from "../lib/types";
 
 export const selectBoard = (s: RootState) => s.board;
 
@@ -18,14 +19,18 @@ export const selectVisibleColumns = createSelector(
       return byQuery && byLabel;
     };
 
-    const sorter = (a: string, b: string) =>
-      sort === "newest"
-        ? (board.tasks[b]?.createdAt ?? 0) - (board.tasks[a]?.createdAt ?? 0)
-        : (board.tasks[a]?.createdAt ?? 0) - (board.tasks[b]?.createdAt ?? 0);
-
-    return board.columns.map((col) => ({
-      ...col,
-      taskIds: col.taskIds.filter(passes).sort(sorter),
-    }));
+    // "manual" preserves the drag order stored in taskIds.
+    // "newest"/"oldest" sort by task creation time.
+    return board.columns
+      .filter((col) => col.id !== UNASSIGNED_ID || col.taskIds.length > 0)
+      .map((col) => {
+        const visible = col.taskIds.filter(passes);
+        if (sort === "manual") return { ...col, taskIds: visible };
+        const sorted = [...visible].sort((a, b) => {
+          const diff = board.tasks[a].createdAt - board.tasks[b].createdAt;
+          return sort === "oldest" ? diff : -diff;
+        });
+        return { ...col, taskIds: sorted };
+      });
   }
 );

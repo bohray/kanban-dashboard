@@ -1,26 +1,31 @@
 "use client";
 
 import { useDispatch, useSelector } from "react-redux";
-import { addTask, updateTask, addLabel } from "../../redux/slices/boardSlice";
+import {
+  addTask,
+  updateTask,
+  addLabel,
+  updateLabel,
+  removeLabel,
+} from "../../redux/slices/boardSlice";
 import { AppDispatch, RootState } from "../../redux/store";
-import { ColumnId, Task } from "../../lib/types";
-import { useState } from "react";
+import { ColumnId, Task, Label, UNASSIGNED_ID } from "../../lib/types";
+import { useRef, useState } from "react";
 import LabelPicker from "./LabelPicker";
+import InputField from "../ui/InputField";
+import Modal from "../Common/Modal";
+import { labelColors } from "../../constants/label-colors";
+import { cn, toSentenceCase } from "../../lib/utils";
 
 type Props =
   | { mode: "create"; initial?: Partial<Task>; onClose: () => void }
   | { mode: "edit"; id: string; onClose: () => void };
 
-const statusOptions: ColumnId[] = [
-  "draft",
-  "unsolved",
-  "under-review",
-  "solved",
-];
-
 export default function TaskModal(props: Props) {
   const dispatch = useDispatch<AppDispatch>();
   const tasks = useSelector((s: RootState) => s.board.tasks);
+  const columns = useSelector((s: RootState) => s.board.columns);
+  const labels = useSelector((s: RootState) => s.board.labels);
 
   const initial: Partial<Task> =
     props.mode === "edit" ? tasks[props.id] : props.initial ?? {};
@@ -33,7 +38,10 @@ export default function TaskModal(props: Props) {
   });
 
   const [newLabel, setNewLabel] = useState("");
+  const [newLabelColor, setNewLabelColor] = useState(labelColors[0]);
+  const [editingLabel, setEditingLabel] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const labelInputRef = useRef<HTMLInputElement>(null);
 
   type FormState = typeof form;
 
@@ -71,33 +79,89 @@ export default function TaskModal(props: Props) {
     props.onClose();
   };
 
-  const handleAddLabel = () => {
-    const name = newLabel.trim();
-    if (!name) return;
-    dispatch(addLabel({ name }));
-    updateForm("labels", Array.from(new Set([...form.labels, name])));
+  const resetLabelForm = () => {
+    setEditingLabel(null);
     setNewLabel("");
+    setNewLabelColor(labelColors[0]);
+    setErr(null);
+  };
+
+  const handleAddLabel = () => {
+    const name = toSentenceCase(newLabel);
+    if (!name) return;
+    dispatch(
+      addLabel({
+        name,
+        class: newLabelColor.class,
+        activeClass: newLabelColor.activeClass,
+      })
+    );
+    updateForm("labels", Array.from(new Set([...form.labels, name])));
+    resetLabelForm();
+  };
+
+  const handleEditLabel = (label: Label) => {
+    setEditingLabel(label.title);
+    setNewLabel(label.title);
+    // Preserve the label's current color even if it isn't in the preset palette.
+    setNewLabelColor({
+      name: "current",
+      class: label.class,
+      activeClass: label.activeClass,
+    });
+    // Move focus off the pill (releases the hover/focus overlay) into the input.
+    labelInputRef.current?.focus();
+  };
+
+  const handleSaveLabel = () => {
+    if (!editingLabel) return;
+    const title = toSentenceCase(newLabel);
+    if (!title) return;
+    if (title !== editingLabel && labels.some((l) => l.title === title)) {
+      setErr("A label with that name already exists.");
+      return;
+    }
+    dispatch(
+      updateLabel({
+        oldTitle: editingLabel,
+        title,
+        class: newLabelColor.class,
+        activeClass: newLabelColor.activeClass,
+      })
+    );
+    // Keep this task's selection in sync if the renamed label was applied.
+    if (title !== editingLabel && form.labels.includes(editingLabel)) {
+      updateForm(
+        "labels",
+        form.labels.map((x) => (x === editingLabel ? title : x))
+      );
+    }
+    resetLabelForm();
+  };
+
+  const handleRemoveLabel = (label: Label) => {
+    dispatch(removeLabel({ title: label.title }));
+    if (form.labels.includes(label.title)) {
+      updateForm(
+        "labels",
+        form.labels.filter((x) => x !== label.title)
+      );
+    }
+    if (editingLabel === label.title) resetLabelForm();
   };
 
   return (
-    <div
-      className="fixed inset-0 bg-black/20 grid place-items-center"
-      onClick={props.onClose}
-    >
-      <div
-        className="w-full max-w-md bg-white rounded-2xl border border-gray-300 shadow p-4"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <h3 className="text-lg font-semibold">
-          {props.mode === "create" ? "Create task" : "Edit task"}
-        </h3>
+    <Modal onClose={props.onClose}>
+      <h3 className="text-lg font-semibold">
+        {props.mode === "create" ? "Create task" : "Edit task"}
+      </h3>
 
         <form onSubmit={onSubmit} className="mt-3 space-y-3">
           {/* Title */}
           <div>
             <label className="text-sm">Title</label>
-            <input
-              className="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2"
+            <InputField
+              className="mt-1 w-full"
               value={form.title}
               onChange={(e) => updateForm("title", e.target.value)}
             />
@@ -106,8 +170,9 @@ export default function TaskModal(props: Props) {
           {/* Description */}
           <div>
             <label className="text-sm">Description</label>
-            <textarea
-              className="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2"
+            <InputField
+              as="textarea"
+              className="mt-1 w-full"
               rows={4}
               value={form.description}
               onChange={(e) => updateForm("description", e.target.value)}
@@ -117,19 +182,23 @@ export default function TaskModal(props: Props) {
           {/* Status */}
           <div>
             <label className="text-sm">Status</label>
-            <select
-              className="mt-1 w-full rounded-xl border border-gray-300 px-3 py-2"
+            <InputField
+              as="select"
+              className="mt-1 w-full"
               value={form.status}
               onChange={(e) => updateForm("status", e.target.value as ColumnId)}
             >
-              {statusOptions.map((status) => (
-                <option key={status} value={status}>
-                  {status
-                    .replace(/-/g, " ")
-                    .replace(/\b\w/g, (c) => c.toUpperCase())}
-                </option>
-              ))}
-            </select>
+              {columns
+                .filter(
+                  (col) =>
+                    col.id !== UNASSIGNED_ID || form.status === UNASSIGNED_ID
+                )
+                .map((col) => (
+                  <option key={col.id} value={col.id}>
+                    {col.name}
+                  </option>
+                ))}
+            </InputField>
           </div>
 
           {/* Labels */}
@@ -138,21 +207,65 @@ export default function TaskModal(props: Props) {
             <LabelPicker
               value={form.labels}
               onChange={(v) => updateForm("labels", v)}
+              onEdit={handleEditLabel}
+              onRemove={handleRemoveLabel}
             />
-            <div className="flex gap-2 mt-2">
-              <input
-                className="flex-1 rounded-xl border border-gray-300 px-3 py-2"
-                placeholder="Add new label..."
-                value={newLabel}
-                onChange={(e) => setNewLabel(e.target.value)}
-              />
-              <button
-                type="button"
-                className="rounded-xl border border-gray-300 cursor-pointer px-3 py-2 bg-gray-50 hover:bg-gray-200"
-                onClick={handleAddLabel}
-              >
-                Add
-              </button>
+            <div className="mt-2 space-y-2">
+              <div className="flex gap-2">
+                <InputField
+                  ref={labelInputRef}
+                  className="flex-1"
+                  placeholder={
+                    editingLabel ? "Rename label..." : "Add new label..."
+                  }
+                  value={newLabel}
+                  onChange={(e) => setNewLabel(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      if (editingLabel) handleSaveLabel();
+                      else handleAddLabel();
+                    }
+                  }}
+                />
+                {editingLabel && (
+                  <button
+                    type="button"
+                    className="rounded-xl border border-gray-300 cursor-pointer px-3 py-2 bg-gray-50 hover:bg-gray-200"
+                    onClick={resetLabelForm}
+                  >
+                    Cancel
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="rounded-xl border border-gray-300 cursor-pointer px-3 py-2 bg-gray-50 hover:bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
+                  onClick={editingLabel ? handleSaveLabel : handleAddLabel}
+                  disabled={!newLabel.trim()}
+                >
+                  {editingLabel ? "Save" : "Add"}
+                </button>
+              </div>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="mr-1 text-xs text-gray-400">Color</span>
+                {labelColors.map((c) => (
+                  <button
+                    key={c.activeClass}
+                    type="button"
+                    title={c.name}
+                    aria-label={c.name}
+                    aria-pressed={newLabelColor.activeClass === c.activeClass}
+                    onClick={() => setNewLabelColor(c)}
+                    className={cn(
+                      "h-5 w-5 rounded-full transition",
+                      c.activeClass,
+                      newLabelColor.activeClass === c.activeClass
+                        ? "ring-2 ring-gray-500 ring-offset-1"
+                        : "hover:scale-110"
+                    )}
+                  />
+                ))}
+              </div>
             </div>
           </div>
 
@@ -173,7 +286,6 @@ export default function TaskModal(props: Props) {
             </button>
           </div>
         </form>
-      </div>
-    </div>
+    </Modal>
   );
 }

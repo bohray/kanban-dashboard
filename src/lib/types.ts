@@ -1,4 +1,4 @@
-type Label = {
+export type Label = {
   title: string;
   class: string;
   activeClass: string;
@@ -19,9 +19,17 @@ export type Task = {
   status: ColumnId;
 };
 export type Column = { id: ColumnId; name: string; taskIds: string[] };
+
+// The permanent landing column for tasks whose column was deleted.
+// Hidden from the board when empty, and locked (no rename/delete/add).
+export const UNASSIGNED_ID = "unassigned";
 export type BoardState = {
   labels: Label[];
   columns: Column[];
   tasks: Record<string, Task>;
-  filters: { query: string; label: string | "All"; sort: "newest" | "oldest" };
+  filters: {
+    query: string;
+    label: string | "All";
+    sort: "manual" | "newest" | "oldest";
+  };
 };

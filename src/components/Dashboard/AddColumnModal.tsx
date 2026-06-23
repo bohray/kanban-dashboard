@@ -4,6 +4,9 @@ import { addCategory } from "@/redux/slices/boardSlice";
 import { AppDispatch } from "@/redux/store";
 import { useState } from "react";
 import { useDispatch } from "react-redux";
+import InputField from "../ui/InputField";
+import Modal from "../Common/Modal";
+import { Plus } from "lucide-react";
 
 export default function AddColumnModal() {
   const [open, setOpen] = useState(false);
@@ -28,25 +31,25 @@ export default function AddColumnModal() {
   };
   return (
     <>
-      <div className="rounded-2xl border border-dashed p-4 grid place-items-center">
-        <button
-          className="rounded-xl border px-3 py-2 bg-gray-50 hover:bg-gray-200 cursor-pointer"
-          onClick={handleOpen}
-        >
-          + Add Column
-        </button>
-      </div>
+      <button
+        onClick={handleOpen}
+        className="grid h-full w-72 shrink-0 cursor-pointer place-items-center rounded-2xl border border-dashed border-gray-300 bg-white/40 font-medium text-gray-500 transition hover:bg-white hover:text-gray-700"
+      >
+        <span className="flex items-center gap-1">
+          <Plus size={16} aria-hidden="true" /> Add Column
+        </span>
+      </button>
 
       {open && (
-        <div className="fixed inset-0 bg-black/20 grid place-items-center">
-          <div className="w-full max-w-md bg-white rounded-2xl border border-gray-300 shadow p-4">
-            <h3 className="text-lg font-semibold">New Category Name</h3>
-            <form onSubmit={onSubmit}>
+        <Modal onClose={handleOpen}>
+          <h3 className="text-lg font-semibold">New Category Name</h3>
+          <form onSubmit={onSubmit}>
               <div className="py-2">
                 <label className="text-sm">Name of the Column</label>
-                <input
-                  type="name"
-                  className="mt-1 w-full rounded-xl border px-3 py-2"
+                <InputField
+                  type="text"
+                  autoFocus
+                  className="mt-1 w-full"
                   value={title}
                   placeholder="Enter Name"
                   onChange={(e) => setTitle(e.target.value)}
@@ -66,8 +69,7 @@ export default function AddColumnModal() {
                 </button>
               </div>
             </form>
-          </div>
-        </div>
+        </Modal>
       )}
     </>
   );
