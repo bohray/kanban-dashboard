@@ -4,17 +4,43 @@ import { loadJSON } from "../../lib/storage";
 import { toSentenceCase } from "../../lib/utils";
 import { BUILT_IN_LABELS } from "../../constants/built-in-labels";
 
+// Seed cards shown on a fresh board. Spread across a few assignees so the
+// avatars render in different colors, with dev-flavored titles and due dates.
+const SEED_BASE_TS = 1750000000000;
+const seedTasks: Array<Omit<Task, "createdAt">> = [
+  // Backlog
+  { id: "seed-1", title: "Set up CI/CD pipeline", labels: ["Medium"], assignee: "Marco Rossi", dueDate: "2026-07-02", status: "backlog" },
+  { id: "seed-2", title: "Design onboarding flow", labels: ["Low"], assignee: "Priya Nair", dueDate: "2026-07-06", status: "backlog" },
+  // To Do
+  { id: "seed-3", title: "Implement JWT refresh tokens", labels: ["High"], assignee: "Yash Bhardwaj", dueDate: "2026-06-28", status: "todo" },
+  { id: "seed-4", title: "Add pagination to users API", labels: ["Medium"], assignee: "Aisha Khan", dueDate: "2026-06-30", status: "todo" },
+  // In Progress
+  { id: "seed-5", title: "Fix WebSocket reconnect race condition", labels: ["Critical"], assignee: "Yash Bhardwaj", dueDate: "2026-06-26", status: "in-progress" },
+  { id: "seed-6", title: "Refactor Redux board slice", labels: ["Low"], assignee: "Marco Rossi", dueDate: "2026-06-29", status: "in-progress" },
+  // Done
+  { id: "seed-7", title: "Migrate database to Postgres 16", labels: ["High"], assignee: "Aisha Khan", dueDate: "2026-06-20", status: "done" },
+  { id: "seed-8", title: "Write unit tests for selectors", labels: ["Medium"], assignee: "Priya Nair", dueDate: "2026-06-22", status: "done" },
+];
+
+const seedTaskMap: Record<string, Task> = {};
+seedTasks.forEach((t, i) => {
+  seedTaskMap[t.id] = { ...t, createdAt: SEED_BASE_TS + i * 60_000 };
+});
+
+const seedColumn = (id: ColumnId) =>
+  seedTasks.filter((t) => t.status === id).map((t) => t.id);
+
 export const defaultState: BoardState = {
   labels: BUILT_IN_LABELS.map((l) => ({ ...l })),
   filters: { query: "", label: "All", sort: "manual" },
   columns: [
-    { id: "draft", name: "Draft", taskIds: [] },
-    { id: "unsolved", name: "Unsolved", taskIds: [] },
-    { id: "under-review", name: "Under Review", taskIds: [] },
-    { id: "solved", name: "Solved", taskIds: [] },
+    { id: "backlog", name: "Backlog", taskIds: seedColumn("backlog") },
+    { id: "todo", name: "To Do", taskIds: seedColumn("todo") },
+    { id: "in-progress", name: "In Progress", taskIds: seedColumn("in-progress") },
+    { id: "done", name: "Done", taskIds: seedColumn("done") },
     { id: UNASSIGNED_ID, name: "Unassigned", taskIds: [] },
   ],
-  tasks: {},
+  tasks: seedTaskMap,
 };
 
 const initial = loadJSON<BoardState>("board") ?? defaultState;

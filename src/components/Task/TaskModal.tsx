@@ -34,7 +34,9 @@ export default function TaskModal(props: Props) {
     title: initial.title ?? "",
     description: initial.description ?? "",
     labels: initial.labels ?? [],
-    status: (initial.status as ColumnId) ?? "draft",
+    status: (initial.status as ColumnId) ?? "backlog",
+    assignee: initial.assignee ?? "",
+    dueDate: initial.dueDate ?? "",
   });
 
   const [newLabel, setNewLabel] = useState("");
@@ -63,6 +65,7 @@ export default function TaskModal(props: Props) {
       ...form,
       title: form.title.trim(),
       description: form.description.trim(),
+      assignee: form.assignee.trim(),
     };
 
     if (props.mode === "create") {
@@ -199,6 +202,28 @@ export default function TaskModal(props: Props) {
                   </option>
                 ))}
             </InputField>
+          </div>
+
+          {/* Assignee & due date */}
+          <div className="flex gap-3">
+            <div className="flex-1">
+              <label className="text-sm">Assignee</label>
+              <InputField
+                className="mt-1 w-full"
+                placeholder="e.g. Yash Bhardwaj"
+                value={form.assignee}
+                onChange={(e) => updateForm("assignee", e.target.value)}
+              />
+            </div>
+            <div className="flex-1">
+              <label className="text-sm">Due date</label>
+              <InputField
+                type="date"
+                className="mt-1 w-full"
+                value={form.dueDate}
+                onChange={(e) => updateForm("dueDate", e.target.value)}
+              />
+            </div>
           </div>
 
           {/* Labels */}

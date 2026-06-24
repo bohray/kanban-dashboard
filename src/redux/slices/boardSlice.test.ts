@@ -143,10 +143,10 @@ describe("filters & reset", () => {
     expect(s.filters.sort).toBe("manual");
   });
 
-  it("resetBoard restores the default columns and clears tasks", () => {
+  it("resetBoard restores the default columns and seed tasks", () => {
     const s = reducer(makeState(), resetBoard());
-    expect(s.tasks).toEqual({});
+    expect(Object.keys(s.tasks).length).toBeGreaterThan(0);
     expect(s.columns.some((c) => c.id === UNASSIGNED_ID)).toBe(true);
-    expect(s.columns.map((c) => c.id)).toContain("draft");
+    expect(s.columns.map((c) => c.id)).toContain("backlog");
   });
 });

@@ -8,7 +8,8 @@ import Column from "../Column/Column";
 import { useMemo, useState } from "react";
 import TaskModal from "../Task/TaskModal";
 import AddColumnModal from "./AddColumnModal";
-import { cn } from "../../lib/utils";
+import { cn, colorFromName, getInitials, formatDueDate } from "../../lib/utils";
+import { Calendar } from "lucide-react";
 import {
   DndContext,
   DragOverlay,
@@ -149,6 +150,29 @@ export default function KanbanBoard() {
                 );
               })}
             </div>
+            {(activeTask.assignee || activeTask.dueDate) && (
+              <div className="mt-3 flex items-center justify-between">
+                {activeTask.assignee ? (
+                  <span
+                    title={activeTask.assignee}
+                    className={cn(
+                      "grid h-6 w-6 place-items-center rounded-full text-[10px] font-semibold text-white",
+                      colorFromName(activeTask.assignee)
+                    )}
+                  >
+                    {getInitials(activeTask.assignee)}
+                  </span>
+                ) : (
+                  <span />
+                )}
+                {activeTask.dueDate && (
+                  <span className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
+                    <Calendar size={12} aria-hidden="true" />
+                    {formatDueDate(activeTask.dueDate)}
+                  </span>
+                )}
+              </div>
+            )}
           </div>
         ) : null}
       </DragOverlay>

@@ -47,7 +47,7 @@ export default function Header() {
         <div className="relative">
           <InputField
             className="w-64"
-            placeholder="Search by issue name..."
+            placeholder="Search by task name..."
             value={filters.query}
             onChange={(e) => dispatch(setFilters({ query: e.target.value }))}
           />

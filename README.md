@@ -6,7 +6,7 @@ A drag-and-drop kanban board for moving work across customizable columns — the
 
 **Stack:** Next.js · React · TypeScript · Redux Toolkit · Tailwind CSS · dnd-kit
 
-![FlowBoard](./public/preview.gif)
+![FlowBoard](./public/preview.png)
 
 ## Why
 
@@ -15,8 +15,9 @@ Most kanban demos stop at "drag a card." FlowBoard is built like a real internal
 ## Features
 
 - **Drag and drop** — reorder tasks within a column or move them across columns (pointer **and** keyboard, via dnd-kit).
-- **Custom columns** — add, rename, and delete columns. Deleting a column is **non-destructive**: its tasks are moved to an _Unassigned_ bucket (which only appears when it holds something) instead of being thrown away.
-- **Tasks** — create/edit/delete with a title, description, status, and labels.
+- **Custom columns** — ships with **Backlog → To Do → In Progress → Done**, and you can add, rename, and delete your own. Deleting a column is **non-destructive**: its tasks are moved to an _Unassigned_ bucket (which only appears when it holds something) instead of being thrown away.
+- **Tasks** — create/edit/delete with a title, description, status, labels, an **assignee**, and a **due date**.
+- **PM-style cards** — each card shows its priority label plus a footer with an **assignee avatar** (initials in a color deterministically derived from the name) and a **due-date chip** (e.g. `Jun 28`).
 - **Labels** — create labels with a color from a preset palette, edit (rename + recolor), and delete. Renaming rewrites every task that uses the label; deleting untags it everywhere. Names are normalized to sentence case.
 - **Search, filter, and sort** — filter by title or label, and order each column manually (drag order), newest, or oldest.
 - **Reset** — restore the default board in one click (with a confirmation).

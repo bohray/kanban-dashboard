@@ -9,8 +9,8 @@ import DeleteModal from "../Common/DeleteModal";
 import { AppDispatch, RootState } from "@/redux/store";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { cn } from "../../lib/utils";
-import { MoreHorizontal } from "lucide-react";
+import { cn, colorFromName, getInitials, formatDueDate } from "../../lib/utils";
+import { MoreHorizontal, Calendar } from "lucide-react";
 
 export default function TaskCard({
   task,
@@ -121,6 +121,29 @@ export default function TaskCard({
                 </span>
               );
             })}
+          </div>
+        )}
+        {(task.assignee || task.dueDate) && (
+          <div className="mt-3 flex items-center justify-between">
+            {task.assignee ? (
+              <span
+                title={task.assignee}
+                className={cn(
+                  "grid h-6 w-6 place-items-center rounded-full text-[10px] font-semibold text-white",
+                  colorFromName(task.assignee)
+                )}
+              >
+                {getInitials(task.assignee)}
+              </span>
+            ) : (
+              <span />
+            )}
+            {task.dueDate && (
+              <span className="inline-flex items-center gap-1 rounded-md bg-gray-100 px-2 py-0.5 text-xs font-medium text-gray-600">
+                <Calendar size={12} aria-hidden="true" />
+                {formatDueDate(task.dueDate)}
+              </span>
+            )}
           </div>
         )}
       </div>

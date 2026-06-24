@@ -5,10 +5,10 @@ export type Label = {
 };
 
 export type ColumnId =
-  | "draft"
-  | "unsolved"
-  | "under-review"
-  | "solved"
+  | "backlog"
+  | "todo"
+  | "in-progress"
+  | "done"
   | (string & {});
 export type Task = {
   id: string;
@@ -17,6 +17,10 @@ export type Task = {
   labels: string[];
   createdAt: number;
   status: ColumnId;
+  // Person responsible — rendered as an initials avatar on the card.
+  assignee?: string;
+  // Target date as an ISO "YYYY-MM-DD" string — rendered as a date chip.
+  dueDate?: string;
 };
 export type Column = { id: ColumnId; name: string; taskIds: string[] };
 
